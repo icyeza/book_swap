@@ -7,6 +7,8 @@ class BookListingCard extends StatelessWidget {
   final String status;
   final String timePosted;
   final VoidCallback onTap;
+  final VoidCallback? onEdit;
+  final String? imageUrl;
 
   const BookListingCard({
     super.key,
@@ -15,6 +17,8 @@ class BookListingCard extends StatelessWidget {
     required this.status,
     required this.timePosted,
     required this.onTap,
+    this.onEdit,
+    this.imageUrl,
   });
 
   @override
@@ -31,7 +35,7 @@ class BookListingCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Book cover placeholder
+              // Book cover - Now displays actual image if available
               Container(
                 width: 80,
                 height: 100,
@@ -39,8 +43,45 @@ class BookListingCard extends StatelessWidget {
                   color: Colors.white24,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Center(
-                  child: Icon(Icons.book, color: Colors.white54, size: 32),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: imageUrl != null && imageUrl!.isNotEmpty
+                      ? Image.network(
+                          imageUrl!,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value:
+                                    loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
+                                    : null,
+                                strokeWidth: 2,
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  Colors.white54,
+                                ),
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Center(
+                              child: Icon(
+                                Icons.book,
+                                color: Colors.white54,
+                                size: 32,
+                              ),
+                            );
+                          },
+                        )
+                      : const Center(
+                          child: Icon(
+                            Icons.book,
+                            color: Colors.white54,
+                            size: 32,
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -82,6 +123,13 @@ class BookListingCard extends StatelessWidget {
                   ],
                 ),
               ),
+              // Edit button
+              if (onEdit != null)
+                IconButton(
+                  icon: const Icon(Icons.edit, color: Colors.white70, size: 20),
+                  onPressed: onEdit,
+                  tooltip: 'Edit',
+                ),
             ],
           ),
         ),

@@ -4,13 +4,16 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import '../providers/book_provider.dart';
 import '../providers/auth_provider.dart';
+import '../models/book.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/form_label.dart';
 import '../widgets/form_text_field.dart';
 import '../widgets/condition_chip_selector.dart';
 
 class PostBookPage extends StatefulWidget {
-  const PostBookPage({super.key});
+  final Book? bookToEdit;
+
+  const PostBookPage({super.key, this.bookToEdit});
 
   @override
   State<PostBookPage> createState() => _PostBookPageState();
@@ -33,6 +36,24 @@ class _PostBookPageState extends State<PostBookPage> {
   File? _selectedImage;
   final ImagePicker _imagePicker = ImagePicker();
   bool _isLoading = false;
+  bool get _isEditMode => widget.bookToEdit != null;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_isEditMode) {
+      _populateFieldsForEdit();
+    }
+  }
+
+  void _populateFieldsForEdit() {
+    final book = widget.bookToEdit!;
+    _titleController.text = book.title;
+    _authorController.text = book.author;
+    _categoryController.text = book.category;
+    _descriptionController.text = book.description ?? '';
+    selectedCondition = book.condition;
+  }
 
   @override
   void dispose() {
@@ -124,31 +145,55 @@ class _PostBookPageState extends State<PostBookPage> {
           throw Exception('User not authenticated');
         }
 
-        final success = await bookProvider.createBook(
-          title: _titleController.text.trim(),
-          author: _authorController.text.trim(),
-          ownerId: authProvider.currentUserId!,
-          ownerName: authProvider.userModel!.displayName,
-          ownerEmail: authProvider.userModel!.email,
-          category: _categoryController.text.trim(),
-          condition: selectedCondition,
-          description: _descriptionController.text.trim(),
-          imageFile: _selectedImage,
-        );
+        bool success;
+
+        if (_isEditMode) {
+          // Update existing book
+          success = await bookProvider.updateBook(
+            bookId: widget.bookToEdit!.id,
+            title: _titleController.text.trim(),
+            author: _authorController.text.trim(),
+            category: _categoryController.text.trim(),
+            condition: selectedCondition,
+            description: _descriptionController.text.trim(),
+            imageFile: _selectedImage,
+          );
+        } else {
+          // Create new book
+          success = await bookProvider.createBook(
+            title: _titleController.text.trim(),
+            author: _authorController.text.trim(),
+            ownerId: authProvider.currentUserId!,
+            ownerName: authProvider.userModel!.displayName,
+            ownerEmail: authProvider.userModel!.email,
+            category: _categoryController.text.trim(),
+            condition: selectedCondition,
+            description: _descriptionController.text.trim(),
+            imageFile: _selectedImage,
+          );
+        }
 
         if (mounted) {
           if (success) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Book posted successfully!'),
+              SnackBar(
+                content: Text(
+                  _isEditMode
+                      ? 'Book updated successfully!'
+                      : 'Book posted successfully!',
+                ),
                 backgroundColor: Colors.green,
               ),
             );
             Navigator.pop(context);
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Failed to post book. Please try again.'),
+              SnackBar(
+                content: Text(
+                  _isEditMode
+                      ? 'Failed to update book. Please try again.'
+                      : 'Failed to post book. Please try again.',
+                ),
                 backgroundColor: Colors.red,
               ),
             );
@@ -184,9 +229,9 @@ class _PostBookPageState extends State<PostBookPage> {
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
           onPressed: _isLoading ? null : () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Post a Book',
-          style: TextStyle(
+        title: Text(
+          _isEditMode ? 'Edit Book' : 'Post a Book',
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 20,
             fontWeight: FontWeight.w600,
@@ -256,13 +301,13 @@ class _PostBookPageState extends State<PostBookPage> {
                               Icon(
                                 Icons.add_photo_alternate_outlined,
                                 size: 64,
-                                color: Colors.white.withOpacity(0.5),
+                                color: Colors.white.withValues(alpha: 0.5),
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 'Tap to add book cover',
                                 style: TextStyle(
-                                  color: Colors.white.withOpacity(0.7),
+                                  color: Colors.white.withValues(alpha: 0.7),
                                   fontSize: 14,
                                 ),
                               ),
@@ -355,7 +400,7 @@ class _PostBookPageState extends State<PostBookPage> {
                     ? Container(
                         height: 50,
                         decoration: BoxDecoration(
-                          color: _accent.withOpacity(0.5),
+                          color: _accent.withValues(alpha: 0.5),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Center(
@@ -371,7 +416,10 @@ class _PostBookPageState extends State<PostBookPage> {
                           ),
                         ),
                       )
-                    : PrimaryButton(text: 'Post', onPressed: _handlePost),
+                    : PrimaryButton(
+                        text: _isEditMode ? 'Update' : 'Post',
+                        onPressed: _handlePost,
+                      ),
                 const SizedBox(height: 20),
               ],
             ),
@@ -381,3 +429,4 @@ class _PostBookPageState extends State<PostBookPage> {
     );
   }
 }
+

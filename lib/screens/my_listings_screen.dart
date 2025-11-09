@@ -1,3 +1,4 @@
+import 'package:book_swap/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/book_provider.dart';
@@ -6,6 +7,7 @@ import '../widgets/search_text_field.dart';
 import '../widgets/book_listing_card.dart';
 import '../models/swap_offer.dart';
 import 'book_detail_screen.dart';
+import 'post_book_screen.dart';
 
 class MyListingsPage extends StatefulWidget {
   const MyListingsPage({super.key});
@@ -147,7 +149,7 @@ class _MyListingsPageState extends State<MyListingsPage>
                       Icon(
                         Icons.book_outlined,
                         size: 80,
-                        color: Colors.white.withOpacity(0.3),
+                        color: Colors.white.withValues(alpha: 0.3),
                       ),
                       const SizedBox(height: 16),
                       Text(
@@ -155,7 +157,7 @@ class _MyListingsPageState extends State<MyListingsPage>
                             ? 'No books listed yet'
                             : 'No books found',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 18,
                         ),
                       ),
@@ -164,7 +166,7 @@ class _MyListingsPageState extends State<MyListingsPage>
                         Text(
                           'Tap the + button to add your first book',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                             fontSize: 14,
                           ),
                         ),
@@ -232,11 +234,21 @@ class _MyListingsPageState extends State<MyListingsPage>
                         author: book.author,
                         status: book.condition,
                         timePosted: book.timeAgo,
+                        imageUrl: book.imageUrl,
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => BookDetailPage(book: book),
+                            ),
+                          );
+                        },
+                        onEdit: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  PostBookPage(bookToEdit: book),
                             ),
                           );
                         },
@@ -250,9 +262,13 @@ class _MyListingsPageState extends State<MyListingsPage>
   }
 
   Widget _buildSentOffersTab(SwapProvider swapProvider) {
+    final authProvider = Provider.of<AuthProvider>(context);
     final sentOffers = swapProvider.requestedSwaps;
+    final filteredSentOffers = sentOffers
+        .where((offer) => offer.requesterId == authProvider.currentUserId!)
+        .toList();
 
-    return sentOffers.isEmpty
+    return filteredSentOffers.isEmpty
         ? Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -260,13 +276,13 @@ class _MyListingsPageState extends State<MyListingsPage>
                 Icon(
                   Icons.swap_horiz,
                   size: 80,
-                  color: Colors.white.withOpacity(0.3),
+                  color: Colors.white.withValues(alpha: 0.3),
                 ),
                 const SizedBox(height: 16),
                 Text(
                   'No sent offers',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 18,
                   ),
                 ),
@@ -288,8 +304,12 @@ class _MyListingsPageState extends State<MyListingsPage>
     BookProvider bookProvider,
   ) {
     final receivedOffers = swapProvider.receivedSwaps;
+    final authProvider = Provider.of<AuthProvider>(context);
+    final filteredReceivedOffers = receivedOffers
+        .where((offer) => offer.requesterId != authProvider.currentUserId!)
+        .toList();
 
-    return receivedOffers.isEmpty
+    return filteredReceivedOffers.isEmpty
         ? Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -297,13 +317,13 @@ class _MyListingsPageState extends State<MyListingsPage>
                 Icon(
                   Icons.inbox,
                   size: 80,
-                  color: Colors.white.withOpacity(0.3),
+                  color: Colors.white.withValues(alpha: 0.3),
                 ),
                 const SizedBox(height: 16),
                 Text(
                   'No received offers',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 18,
                   ),
                 ),
@@ -340,6 +360,8 @@ class _MyListingsPageState extends State<MyListingsPage>
         statusColor = Colors.grey;
     }
 
+    final bookProvider = Provider.of<BookProvider>(context, listen: false);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -371,7 +393,7 @@ class _MyListingsPageState extends State<MyListingsPage>
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.2),
+                  color: statusColor.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -385,11 +407,80 @@ class _MyListingsPageState extends State<MyListingsPage>
               ),
             ],
           ),
+          const SizedBox(height: 16),
+
+          // Book swap details
+          FutureBuilder<List<dynamic>>(
+            future: Future.wait([
+              bookProvider.getBook(offer.requestedBookId),
+              bookProvider.getBook(offer.offeredBookId),
+            ]),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                );
+              }
+
+              if (!snapshot.hasData || snapshot.data == null) {
+                return const Text(
+                  'Loading book details...',
+                  style: TextStyle(color: Colors.white60, fontSize: 12),
+                );
+              }
+
+              final requestedBook = snapshot.data![0];
+              final offeredBook = snapshot.data![1];
+
+              return Column(
+                children: [
+                  // Offered book (what they're giving)
+                  _buildBookPreview(
+                    title: offeredBook?.title ?? 'Unknown',
+                    author: offeredBook?.author ?? 'Unknown',
+                    label: isSent ? 'Your Book' : 'They Offer',
+                    labelColor: Colors.blue,
+                  ),
+
+                  // Swap icon
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Row(
+                      children: [
+                        Expanded(child: Divider(color: Colors.white24)),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Icon(
+                            Icons.swap_horiz,
+                            color: _accent,
+                            size: 24,
+                          ),
+                        ),
+                        Expanded(child: Divider(color: Colors.white24)),
+                      ],
+                    ),
+                  ),
+
+                  // Requested book (what they want)
+                  _buildBookPreview(
+                    title: requestedBook?.title ?? 'Unknown',
+                    author: requestedBook?.author ?? 'Unknown',
+                    label: isSent ? 'They Have' : 'Your Book',
+                    labelColor: Colors.green,
+                  ),
+                ],
+              );
+            },
+          ),
+
           const SizedBox(height: 12),
           Text(
             'Created: ${_formatDate(offer.createdAt)}',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withValues(alpha: 0.6),
               fontSize: 12,
             ),
           ),
@@ -509,6 +600,78 @@ class _MyListingsPageState extends State<MyListingsPage>
     );
   }
 
+  Widget _buildBookPreview({
+    required String title,
+    required String author,
+    required String label,
+    required Color labelColor,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: labelColor.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.white12,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: const Icon(Icons.book, color: Colors.white54, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: labelColor.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      color: labelColor,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  author,
+                  style: const TextStyle(color: Colors.white60, fontSize: 12),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date);
@@ -524,3 +687,4 @@ class _MyListingsPageState extends State<MyListingsPage>
     }
   }
 }
+

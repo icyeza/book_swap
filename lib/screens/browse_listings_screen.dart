@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/book_provider.dart';
-import '../providers/auth_provider.dart';
 import '../widgets/book_listing_card.dart';
 import '../widgets/search_text_field.dart';
 import '../widgets/category_filter_row.dart';
-import '../constants/dummy_data.dart';
 import 'book_detail_screen.dart';
 
 class BrowseListingsPage extends StatefulWidget {
@@ -17,11 +15,23 @@ class BrowseListingsPage extends StatefulWidget {
 
 class _BrowseListingsPageState extends State<BrowseListingsPage> {
   static const Color _bg = Color(0xFF0B1026);
+  List<String> getAllCategories() {
+    return [
+      'All',
+      'Computer Science',
+      'Data Structures',
+      'Operating Systems',
+      'Algorithms',
+      'Databases',
+      'Networks',
+      'Software Engineering',
+      'Mathematics',
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
     final bookProvider = Provider.of<BookProvider>(context);
-    final authProvider = Provider.of<AuthProvider>(context);
     final books = bookProvider.books;
 
     return Scaffold(
@@ -71,13 +81,13 @@ class _BrowseListingsPageState extends State<BrowseListingsPage> {
                         Icon(
                           Icons.book_outlined,
                           size: 80,
-                          color: Colors.white.withOpacity(0.3),
+                          color: Colors.white.withValues(alpha: 0.3),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'No books found',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.7),
+                            color: Colors.white.withValues(alpha: 0.7),
                             fontSize: 18,
                           ),
                         ),
@@ -85,7 +95,7 @@ class _BrowseListingsPageState extends State<BrowseListingsPage> {
                         Text(
                           'Be the first to post a book!',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                             fontSize: 14,
                           ),
                         ),
@@ -98,14 +108,15 @@ class _BrowseListingsPageState extends State<BrowseListingsPage> {
                     itemBuilder: (context, index) {
                       final book = books[index];
                       // Don't show user's own books in browse
-                      if (book.ownerId == authProvider.currentUserId) {
-                        return const SizedBox.shrink();
-                      }
+                      // if (book.ownerId == authProvider.currentUserId) {
+                      //   return const SizedBox.shrink();
+                      // }
                       return BookListingCard(
                         title: book.title,
                         author: book.author,
                         status: book.condition,
                         timePosted: book.timeAgo,
+                        imageUrl: book.imageUrl,
                         onTap: () {
                           Navigator.push(
                             context,

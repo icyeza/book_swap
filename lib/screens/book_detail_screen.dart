@@ -5,8 +5,15 @@ import '../providers/auth_provider.dart';
 import '../providers/book_provider.dart';
 import '../providers/swap_provider.dart';
 import '../providers/chat_provider.dart';
-import '../widgets/primary_button.dart';
 import '../widgets/status_chip.dart';
+import 'post_book_screen.dart';
+
+class ChatDetailArguments {
+  final String chatId;
+  final String participantName;
+
+  ChatDetailArguments({required this.chatId, required this.participantName});
+}
 
 class BookDetailPage extends StatelessWidget {
   final Book book;
@@ -64,7 +71,7 @@ class BookDetailPage extends StatelessWidget {
               final myBook = myBooks[index];
               return ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: _accent.withOpacity(0.3),
+                  backgroundColor: _accent.withValues(alpha: 0.3),
                   child: Icon(Icons.book, color: _accent),
                 ),
                 title: Text(
@@ -155,7 +162,14 @@ class BookDetailPage extends StatelessWidget {
     if (chatId != null && context.mounted) {
       // Navigate to chat detail screen
       // Assuming you have a route setup for chat detail
-      Navigator.pushNamed(context, '/chat-detail', arguments: chatId);
+      Navigator.pushNamed(
+        context,
+        '/chat-detail',
+        arguments: ChatDetailArguments(
+          chatId: chatId,
+          participantName: book.ownerName,
+        ),
+      );
     }
   }
 
@@ -174,6 +188,19 @@ class BookDetailPage extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
+          if (isOwnBook)
+            IconButton(
+              icon: const Icon(Icons.edit, color: Colors.white),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PostBookPage(bookToEdit: book),
+                  ),
+                );
+              },
+              tooltip: 'Edit Book',
+            ),
           IconButton(
             icon: const Icon(Icons.share, color: Colors.white),
             onPressed: () {
@@ -443,24 +470,45 @@ class BookDetailPage extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: book.isAvailable
-                          ? PrimaryButton(
-                              text: 'Request Swap',
+                          ? ElevatedButton(
                               onPressed: () => _requestSwap(context),
-                            )
-                          : Container(
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              decoration: BoxDecoration(
-                                color: Colors.grey.withOpacity(0.3),
-                                borderRadius: BorderRadius.circular(12),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _accent,
+                                foregroundColor: Colors.black87,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 0,
                               ),
-                              child: const Center(
-                                child: Text(
-                                  'Not Available',
-                                  style: TextStyle(
-                                    color: Colors.white60,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                              child: const Text(
+                                'Request Swap',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            )
+                          : ElevatedButton(
+                              onPressed: null,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _accent,
+                                foregroundColor: Colors.black87,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: const Text(
+                                'Not Available',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),

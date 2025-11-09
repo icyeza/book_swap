@@ -1,3 +1,5 @@
+import 'package:book_swap/screens/book_detail_screen.dart';
+import 'package:book_swap/screens/chat_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
@@ -59,6 +61,15 @@ class MyApp extends StatelessWidget {
               '/my-listings': (context) => const MyListingsPage(),
               '/post-book': (context) => const PostBookPage(),
               '/chats': (context) => const ChatsScreen(),
+              '/chat-detail': (context) {
+                final args =
+                    ModalRoute.of(context)!.settings.arguments
+                        as ChatDetailArguments;
+                return ChatDetailScreen(
+                  chatId: args.chatId,
+                  participantName: args.participantName,
+                );
+              },
               '/settings': (context) => const SettingsScreen(),
             },
           );
