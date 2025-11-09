@@ -46,7 +46,7 @@ class SettingsScreen extends StatelessWidget {
                     child: Row(
                       children: [
                         CircleAvatar(
-                          backgroundColor: _accent.withOpacity(0.2),
+                          backgroundColor: _accent.withValues(alpha: 0.2),
                           radius: 40,
                           child: user.photoUrl != null
                               ? ClipOval(
@@ -83,7 +83,7 @@ class SettingsScreen extends StatelessWidget {
                               Text(
                                 user.email,
                                 style: TextStyle(
-                                  color: Colors.white.withOpacity(0.7),
+                                  color: Colors.white.withValues(alpha: 0.7),
                                   fontSize: 14,
                                 ),
                               ),
@@ -319,14 +319,14 @@ class _NotificationToggle extends StatelessWidget {
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
+                    color: Colors.white.withValues(alpha: 0.6),
                     fontSize: 13,
                   ),
                 ),
               ],
             ),
           ),
-          Switch(value: value, onChanged: onChanged, activeColor: _accent),
+          Switch(value: value, onChanged: onChanged, activeThumbColor: _accent),
         ],
       ),
     );
@@ -369,8 +369,8 @@ class _SettingsButton extends StatelessWidget {
         trailing: Icon(
           Icons.chevron_right,
           color: isDestructive
-              ? Colors.red.withOpacity(0.5)
-              : Colors.white.withOpacity(0.5),
+              ? Colors.red.withValues(alpha: 0.5)
+              : Colors.white.withValues(alpha: 0.5),
         ),
         onTap: onTap,
       ),

@@ -20,7 +20,7 @@ class AppBottomNavBar extends StatelessWidget {
         BottomNavigationBarItem(
           icon: Icon(Icons.home_outlined),
           activeIcon: Icon(Icons.home),
-          label: 'Home',
+          label: 'Browse',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.list_alt_outlined),
@@ -31,11 +31,6 @@ class AppBottomNavBar extends StatelessWidget {
           icon: Icon(Icons.chat_bubble_outline),
           activeIcon: Icon(Icons.chat_bubble),
           label: 'Chats',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person_outline),
-          activeIcon: Icon(Icons.person),
-          label: 'Profile',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.settings_outlined),

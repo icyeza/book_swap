@@ -39,13 +39,13 @@ class ChatsScreen extends StatelessWidget {
                   Icon(
                     Icons.chat_bubble_outline,
                     size: 80,
-                    color: Colors.white.withOpacity(0.3),
+                    color: Colors.white.withValues(alpha: 0.3),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'No chats yet',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 18,
                     ),
                   ),
@@ -53,7 +53,7 @@ class ChatsScreen extends StatelessWidget {
                   Text(
                     'Start a swap to begin chatting',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.5),
+                      color: Colors.white.withValues(alpha: 0.5),
                       fontSize: 14,
                     ),
                   ),
@@ -135,7 +135,7 @@ class _ChatListItem extends StatelessWidget {
       child: ListTile(
         contentPadding: const EdgeInsets.all(16),
         leading: CircleAvatar(
-          backgroundColor: _accent.withOpacity(0.2),
+          backgroundColor: _accent.withValues(alpha: 0.2),
           radius: 28,
           child: Text(
             participantName[0].toUpperCase(),
@@ -160,7 +160,7 @@ class _ChatListItem extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.6),
+                  color: Colors.white.withValues(alpha: 0.6),
                   fontSize: 14,
                 ),
               )
@@ -169,7 +169,7 @@ class _ChatListItem extends StatelessWidget {
             ? Text(
                 _formatTime(chat.lastMessageTime),
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.5),
+                  color: Colors.white.withValues(alpha: 0.5),
                   fontSize: 12,
                 ),
               )

@@ -87,7 +87,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         title: Row(
           children: [
             CircleAvatar(
-              backgroundColor: _accent.withOpacity(0.2),
+              backgroundColor: _accent.withValues(alpha: 0.2),
               radius: 18,
               child: Text(
                 widget.participantName[0].toUpperCase(),
@@ -119,7 +119,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                     child: Text(
                       'No messages yet',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.5),
+                        color: Colors.white.withValues(alpha: 0.5),
                         fontSize: 16,
                       ),
                     ),
@@ -145,7 +145,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
               color: _cardBg,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 10,
                   offset: const Offset(0, -2),
                 ),
@@ -162,7 +162,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                       decoration: InputDecoration(
                         hintText: 'Type a message...',
                         hintStyle: TextStyle(
-                          color: Colors.white.withOpacity(0.5),
+                          color: Colors.white.withValues(alpha: 0.5),
                         ),
                         filled: true,
                         fillColor: _bg,
@@ -249,8 +249,8 @@ class _MessageBubble extends StatelessWidget {
               _formatTime(message.timestamp),
               style: TextStyle(
                 color: isMe
-                    ? const Color(0xFF0B1026).withOpacity(0.6)
-                    : Colors.white.withOpacity(0.6),
+                    ? const Color(0xFF0B1026).withValues(alpha: 0.6)
+                    : Colors.white.withValues(alpha: 0.6),
                 fontSize: 11,
               ),
             ),
