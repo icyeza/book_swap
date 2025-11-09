@@ -73,7 +73,7 @@ class WelcomeScreen extends StatelessWidget {
             // const SizedBox(height: 22),
             PrimaryButton(
               text: 'Sign In',
-              onPressed: () => Navigator.pushNamed(context, '/signup'),
+              onPressed: () => Navigator.pushNamed(context, '/login'),
             ),
             const SizedBox(height: 6),
           ],

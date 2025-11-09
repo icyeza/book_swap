@@ -111,11 +111,35 @@ class SwapProvider with ChangeNotifier {
       _error = null;
       notifyListeners();
 
-      await _swapService.acceptSwapOffer(offerId);
+      // Get the book details before swapping to access owner emails
+      final requestedBook = await _bookService.getBook(offer.requestedBookId);
+      final offeredBook = await _bookService.getBook(offer.offeredBookId);
 
-      // Update books status
-      await _bookService.updateBookStatus(offer.requestedBookId, 'swapped');
-      await _bookService.updateBookStatus(offer.offeredBookId, 'swapped');
+      if (requestedBook == null || offeredBook == null) {
+        throw Exception('Books not found');
+      }
+
+      // Swap the book ownership
+      // The requester gets the requested book (owner's book)
+      await _bookService.transferBookOwnership(
+        offer.requestedBookId,
+        offer.requesterId,
+        offer.requesterName,
+        offeredBook
+            .ownerEmail, // Use the offered book owner's email (the requester)
+      );
+
+      // The owner gets the offered book (requester's book)
+      await _bookService.transferBookOwnership(
+        offer.offeredBookId,
+        offer.ownerId,
+        offer.ownerName,
+        requestedBook
+            .ownerEmail, // Use the requested book owner's email (the receiver)
+      );
+
+      // Update swap offer status
+      await _swapService.acceptSwapOffer(offerId);
 
       _isLoading = false;
       notifyListeners();

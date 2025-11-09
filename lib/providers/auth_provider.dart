@@ -33,13 +33,18 @@ class AuthProvider with ChangeNotifier {
 
   // Load user data from Firestore
   Future<void> _loadUserData(String userId) async {
-    try {
-      _userModel = await _authService.getUserData(userId);
-      notifyListeners();
-    } catch (e) {
-      _error = e.toString();
-      notifyListeners();
+    int attempts = 0;
+    while (attempts < 3 && _userModel == null) {
+      try {
+        _userModel = await _authService.getUserData(userId);
+        if (_userModel != null) break;
+      } catch (e) {
+        _error = e.toString();
+      }
+      attempts++;
+      await Future.delayed(const Duration(milliseconds: 200));
     }
+    notifyListeners();
   }
 
   // Sign up
