@@ -48,6 +48,7 @@ class AuthService {
             .set(userModel.toFirestore());
       }
 
+      await _auth.currentUser?.reload();
       return userCredential;
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
@@ -164,6 +165,8 @@ class AuthService {
         return 'Wrong password provided.';
       case 'invalid-email':
         return 'The email address is not valid.';
+      case 'invalid-credential':
+        return 'Wrong email or password provided.';
       case 'user-disabled':
         return 'This user account has been disabled.';
       case 'too-many-requests':

@@ -84,7 +84,7 @@ class StorageService {
       await ref.delete();
     } catch (e) {
       // Image might not exist, ignore error
-      print('Failed to delete image: $e');
+      // print('Failed to delete image: $e');
     }
   }
 
@@ -99,7 +99,7 @@ class StorageService {
         }
       }
     } catch (e) {
-      print('Failed to delete book image: $e');
+      // print('Failed to delete book image: $e');
     }
   }
 

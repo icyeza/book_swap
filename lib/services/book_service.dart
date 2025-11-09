@@ -110,6 +110,28 @@ class BookService {
     }
   }
 
+  // Transfer book ownership
+  Future<void> transferBookOwnership(
+    String bookId,
+    String newOwnerId,
+    String newOwnerName,
+    String newOwnerEmail,
+  ) async {
+    try {
+      await _firestore.collection(_collection).doc(bookId).update({
+        'ownerId': newOwnerId,
+        'ownerName': newOwnerName,
+        'ownerEmail': newOwnerEmail,
+        'status': 'swapped',
+        'isAvailable': true,
+        'datePosted':
+            Timestamp.now(), // Reset date to show as recently acquired
+      });
+    } catch (e) {
+      throw Exception('Failed to transfer book ownership: $e');
+    }
+  }
+
   // Search books
   Stream<List<Book>> searchBooks(String query) {
     // Note: For better search functionality, consider using Algolia or similar
